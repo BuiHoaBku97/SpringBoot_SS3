@@ -6,7 +6,6 @@ import startup.vn.coursemanagement.models.entity.Course;
 import startup.vn.coursemanagement.repositories.CourseRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CourseService {
@@ -21,7 +20,19 @@ public class CourseService {
         return courseRepository.findAll();
     }
 
-    public Optional<Course> getCourseById(Long id) {
-        return courseRepository.findById(id);
+    public Course getCourseById(Long id) {
+        return courseRepository.findById(id).orElse(null);
+    }
+
+    public Course createCourse(Course course) {
+        return courseRepository.create(course);
+    }
+
+    public Course updateCourse(Long id, Course course) {
+        return courseRepository.update(id, course).orElse(null);
+    }
+
+    public Course deleteCourseById(Long id) {
+        return courseRepository.deleteById(id).orElse(null);
     }
 }

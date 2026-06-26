@@ -6,7 +6,6 @@ import startup.vn.coursemanagement.models.entity.Instructor;
 import startup.vn.coursemanagement.repositories.InstructorRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class InstructorService {
@@ -21,7 +20,19 @@ public class InstructorService {
         return instructorRepository.findAll();
     }
 
-    public Optional<Instructor> getInstructorById(Long id) {
-        return instructorRepository.findById(id);
+    public Instructor getInstructorById(Long id) {
+        return instructorRepository.findById(id).orElse(null);
+    }
+
+    public Instructor createInstructor(Instructor instructor) {
+        return instructorRepository.create(instructor);
+    }
+
+    public Instructor updateInstructor(Long id, Instructor instructor) {
+        return instructorRepository.update(id, instructor).orElse(null);
+    }
+
+    public Instructor deleteInstructorById(Long id) {
+        return instructorRepository.deleteById(id).orElse(null);
     }
 }

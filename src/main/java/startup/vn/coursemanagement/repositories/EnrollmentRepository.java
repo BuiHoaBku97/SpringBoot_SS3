@@ -3,23 +3,62 @@ package startup.vn.coursemanagement.repositories;
 import org.springframework.stereotype.Repository;
 import startup.vn.coursemanagement.models.entity.Enrollment;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class EnrollmentRepository {
-    private final List<Enrollment> enrollments = List.of(
+    private final List<Enrollment> enrollments = new ArrayList<>(List.of(
             Enrollment.builder().id(1L).studentName("Le Van C").courseId(1L).build(),
             Enrollment.builder().id(2L).studentName("Pham Thi D").courseId(2L).build()
-    );
+    ));
 
     public List<Enrollment> findAll() {
-        return enrollments;
+        return List.copyOf(enrollments);
     }
 
     public Optional<Enrollment> findById(Long id) {
         return enrollments.stream()
                 .filter(enrollment -> enrollment.getId().equals(id))
                 .findFirst();
+    }
+
+    public Enrollment create(Enrollment enrollment) {
+        Long nextId = enrollments.stream()
+                .mapToLong(Enrollment::getId)
+                .max()
+                .orElse(0L) + 1;
+        Enrollment saved = Enrollment.builder()
+                .id(nextId)
+                .studentName(enrollment.getStudentName())
+                .courseId(enrollment.getCourseId())
+                .build();
+        enrollments.add(saved);
+        return saved;
+    }
+
+    public Optional<Enrollment> update(Long id, Enrollment enrollment) {
+        for (int i = 0; i < enrollments.size(); i++) {
+            if (enrollments.get(i).getId().equals(id)) {
+                Enrollment updated = Enrollment.builder()
+                        .id(id)
+                        .studentName(enrollment.getStudentName())
+                        .courseId(enrollment.getCourseId())
+                        .build();
+                enrollments.set(i, updated);
+                return Optional.of(updated);
+            }
+        }
+        return Optional.empty();
+    }
+
+    public Optional<Enrollment> deleteById(Long id) {
+        for (int i = 0; i < enrollments.size(); i++) {
+            if (enrollments.get(i).getId().equals(id)) {
+                return Optional.of(enrollments.remove(i));
+            }
+        }
+        return Optional.empty();
     }
 }

@@ -6,7 +6,6 @@ import startup.vn.coursemanagement.models.entity.Enrollment;
 import startup.vn.coursemanagement.repositories.EnrollmentRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class EnrollmentService {
@@ -21,7 +20,19 @@ public class EnrollmentService {
         return enrollmentRepository.findAll();
     }
 
-    public Optional<Enrollment> getEnrollmentById(Long id) {
-        return enrollmentRepository.findById(id);
+    public Enrollment getEnrollmentById(Long id) {
+        return enrollmentRepository.findById(id).orElse(null);
+    }
+
+    public Enrollment createEnrollment(Enrollment enrollment) {
+        return enrollmentRepository.create(enrollment);
+    }
+
+    public Enrollment updateEnrollment(Long id, Enrollment enrollment) {
+        return enrollmentRepository.update(id, enrollment).orElse(null);
+    }
+
+    public Enrollment deleteEnrollmentById(Long id) {
+        return enrollmentRepository.deleteById(id).orElse(null);
     }
 }
