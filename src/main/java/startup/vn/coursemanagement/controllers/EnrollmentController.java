@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import startup.vn.coursemanagement.Services.EnrollmentService;
+import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.EnrollmentRequestDto;
 import startup.vn.coursemanagement.models.dto.response.EnrollmentResponseDto;
@@ -42,10 +43,12 @@ public class EnrollmentController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<EnrollmentResponseDto>> getEnrollmentById(@PathVariable Long id) {
-        Enrollment enrollment = enrollmentService.getEnrollmentById(id);
-        return enrollment == null
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<EnrollmentResponseDto>failure("Enrollment not found", null))
-                : ResponseEntity.ok(ApiResponse.success("Enrollment retrieved successfully", EnrollmentResponseDto.fromEntity(enrollment)));
+        try {
+            Enrollment enrollment = enrollmentService.getEnrollmentById(id);
+            return ResponseEntity.ok(ApiResponse.success("Enrollment retrieved successfully", EnrollmentResponseDto.fromEntity(enrollment)));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure(ex.getMessage(), null));
+        }
     }
 
     @PostMapping
@@ -59,17 +62,21 @@ public class EnrollmentController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<EnrollmentResponseDto>> updateEnrollment(@PathVariable Long id, @Valid @RequestBody EnrollmentRequestDto request) {
-        Enrollment updated = enrollmentService.updateEnrollment(id, request.toEntity());
-        return updated == null
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<EnrollmentResponseDto>failure("Enrollment not found", null))
-                : ResponseEntity.ok(ApiResponse.success("Enrollment updated successfully", EnrollmentResponseDto.fromEntity(updated)));
+        try {
+            Enrollment updated = enrollmentService.updateEnrollment(id, request.toEntity());
+            return ResponseEntity.ok(ApiResponse.success("Enrollment updated successfully", EnrollmentResponseDto.fromEntity(updated)));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure(ex.getMessage(), null));
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<EnrollmentResponseDto>> deleteEnrollment(@PathVariable Long id) {
-        Enrollment deleted = enrollmentService.deleteEnrollmentById(id);
-        return deleted == null
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<EnrollmentResponseDto>failure("Enrollment not found", null))
-                : ResponseEntity.ok(ApiResponse.success("Enrollment deleted successfully", EnrollmentResponseDto.fromEntity(deleted)));
+        try {
+            Enrollment deleted = enrollmentService.deleteEnrollmentById(id);
+            return ResponseEntity.ok(ApiResponse.success("Enrollment deleted successfully", EnrollmentResponseDto.fromEntity(deleted)));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure(ex.getMessage(), null));
+        }
     }
 }

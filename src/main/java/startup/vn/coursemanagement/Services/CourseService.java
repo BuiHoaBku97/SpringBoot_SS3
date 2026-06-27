@@ -2,6 +2,7 @@ package startup.vn.coursemanagement.Services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.entity.Course;
 import startup.vn.coursemanagement.repositories.CourseRepository;
 
@@ -21,7 +22,8 @@ public class CourseService {
     }
 
     public Course getCourseById(Long id) {
-        return courseRepository.findById(id).orElse(null);
+        return courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
     }
 
     public Course createCourse(Course course) {
@@ -29,10 +31,14 @@ public class CourseService {
     }
 
     public Course updateCourse(Long id, Course course) {
-        return courseRepository.update(id, course).orElse(null);
+        Course existing = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        return courseRepository.update(existing, course);
     }
 
     public Course deleteCourseById(Long id) {
-        return courseRepository.deleteById(id).orElse(null);
+        Course existing = courseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        return courseRepository.delete(existing);
     }
 }

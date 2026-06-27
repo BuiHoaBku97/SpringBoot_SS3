@@ -38,27 +38,18 @@ public class InstructorRepository {
         return saved;
     }
 
-    public Optional<Instructor> update(Long id, Instructor instructor) {
-        for (int i = 0; i < instructors.size(); i++) {
-            if (instructors.get(i).getId().equals(id)) {
-                Instructor updated = Instructor.builder()
-                        .id(id)
-                        .name(instructor.getName())
-                        .email(instructor.getEmail())
-                        .build();
-                instructors.set(i, updated);
-                return Optional.of(updated);
-            }
-        }
-        return Optional.empty();
+    public Instructor update(Instructor existing, Instructor instructor) {
+        Instructor updated = Instructor.builder()
+                .id(existing.getId())
+                .name(instructor.getName())
+                .email(instructor.getEmail())
+                .build();
+        instructors.set(instructors.indexOf(existing), updated);
+        return updated;
     }
 
-    public Optional<Instructor> deleteById(Long id) {
-        for (int i = 0; i < instructors.size(); i++) {
-            if (instructors.get(i).getId().equals(id)) {
-                return Optional.of(instructors.remove(i));
-            }
-        }
-        return Optional.empty();
+    public Instructor delete(Instructor existing) {
+        instructors.remove(existing);
+        return existing;
     }
 }

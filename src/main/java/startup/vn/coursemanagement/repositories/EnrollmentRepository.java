@@ -38,27 +38,18 @@ public class EnrollmentRepository {
         return saved;
     }
 
-    public Optional<Enrollment> update(Long id, Enrollment enrollment) {
-        for (int i = 0; i < enrollments.size(); i++) {
-            if (enrollments.get(i).getId().equals(id)) {
-                Enrollment updated = Enrollment.builder()
-                        .id(id)
-                        .studentName(enrollment.getStudentName())
-                        .courseId(enrollment.getCourseId())
-                        .build();
-                enrollments.set(i, updated);
-                return Optional.of(updated);
-            }
-        }
-        return Optional.empty();
+    public Enrollment update(Enrollment existing, Enrollment enrollment) {
+        Enrollment updated = Enrollment.builder()
+                .id(existing.getId())
+                .studentName(enrollment.getStudentName())
+                .courseId(enrollment.getCourseId())
+                .build();
+        enrollments.set(enrollments.indexOf(existing), updated);
+        return updated;
     }
 
-    public Optional<Enrollment> deleteById(Long id) {
-        for (int i = 0; i < enrollments.size(); i++) {
-            if (enrollments.get(i).getId().equals(id)) {
-                return Optional.of(enrollments.remove(i));
-            }
-        }
-        return Optional.empty();
+    public Enrollment delete(Enrollment existing) {
+        enrollments.remove(existing);
+        return existing;
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import startup.vn.coursemanagement.Services.CourseService;
+import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.CourseRequestDto;
 import startup.vn.coursemanagement.models.dto.response.CourseResponseDto;
@@ -42,10 +43,12 @@ public class CourseController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<CourseResponseDto>> getCourseById(@PathVariable Long id) {
-        Course course = courseService.getCourseById(id);
-        return course == null
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<CourseResponseDto>failure("Course not found", null))
-                : ResponseEntity.ok(ApiResponse.success("Course retrieved successfully", CourseResponseDto.fromEntity(course)));
+        try {
+            Course course = courseService.getCourseById(id);
+            return ResponseEntity.ok(ApiResponse.success("Course retrieved successfully", CourseResponseDto.fromEntity(course)));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure(ex.getMessage(), null));
+        }
     }
 
     @PostMapping
@@ -59,17 +62,21 @@ public class CourseController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<CourseResponseDto>> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseRequestDto request) {
-        Course updated = courseService.updateCourse(id, request.toEntity());
-        return updated == null
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<CourseResponseDto>failure("Course not found", null))
-                : ResponseEntity.ok(ApiResponse.success("Course updated successfully", CourseResponseDto.fromEntity(updated)));
+        try {
+            Course updated = courseService.updateCourse(id, request.toEntity());
+            return ResponseEntity.ok(ApiResponse.success("Course updated successfully", CourseResponseDto.fromEntity(updated)));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure(ex.getMessage(), null));
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<CourseResponseDto>> deleteCourse(@PathVariable Long id) {
-        Course deleted = courseService.deleteCourseById(id);
-        return deleted == null
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<CourseResponseDto>failure("Course not found", null))
-                : ResponseEntity.ok(ApiResponse.success("Course deleted successfully", CourseResponseDto.fromEntity(deleted)));
+        try {
+            Course deleted = courseService.deleteCourseById(id);
+            return ResponseEntity.ok(ApiResponse.success("Course deleted successfully", CourseResponseDto.fromEntity(deleted)));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure(ex.getMessage(), null));
+        }
     }
 }

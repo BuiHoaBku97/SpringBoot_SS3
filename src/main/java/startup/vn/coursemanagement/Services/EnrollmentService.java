@@ -2,6 +2,7 @@ package startup.vn.coursemanagement.Services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.entity.Enrollment;
 import startup.vn.coursemanagement.repositories.EnrollmentRepository;
 
@@ -21,7 +22,8 @@ public class EnrollmentService {
     }
 
     public Enrollment getEnrollmentById(Long id) {
-        return enrollmentRepository.findById(id).orElse(null);
+        return enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
     }
 
     public Enrollment createEnrollment(Enrollment enrollment) {
@@ -29,10 +31,14 @@ public class EnrollmentService {
     }
 
     public Enrollment updateEnrollment(Long id, Enrollment enrollment) {
-        return enrollmentRepository.update(id, enrollment).orElse(null);
+        Enrollment existing = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+        return enrollmentRepository.update(existing, enrollment);
     }
 
     public Enrollment deleteEnrollmentById(Long id) {
-        return enrollmentRepository.deleteById(id).orElse(null);
+        Enrollment existing = enrollmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
+        return enrollmentRepository.delete(existing);
     }
 }

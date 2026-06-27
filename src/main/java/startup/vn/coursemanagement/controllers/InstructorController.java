@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import startup.vn.coursemanagement.Services.InstructorService;
+import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.InstructorRequestDto;
 import startup.vn.coursemanagement.models.dto.response.InstructorResponseDto;
@@ -42,10 +43,12 @@ public class InstructorController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<InstructorResponseDto>> getInstructorById(@PathVariable Long id) {
-        Instructor instructor = instructorService.getInstructorById(id);
-        return instructor == null
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<InstructorResponseDto>failure("Instructor not found", null))
-                : ResponseEntity.ok(ApiResponse.success("Instructor retrieved successfully", InstructorResponseDto.fromEntity(instructor)));
+        try {
+            Instructor instructor = instructorService.getInstructorById(id);
+            return ResponseEntity.ok(ApiResponse.success("Instructor retrieved successfully", InstructorResponseDto.fromEntity(instructor)));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure(ex.getMessage(), null));
+        }
     }
 
     @PostMapping
@@ -59,17 +62,21 @@ public class InstructorController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<InstructorResponseDto>> updateInstructor(@PathVariable Long id, @Valid @RequestBody InstructorRequestDto request) {
-        Instructor updated = instructorService.updateInstructor(id, request.toEntity());
-        return updated == null
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<InstructorResponseDto>failure("Instructor not found", null))
-                : ResponseEntity.ok(ApiResponse.success("Instructor updated successfully", InstructorResponseDto.fromEntity(updated)));
+        try {
+            Instructor updated = instructorService.updateInstructor(id, request.toEntity());
+            return ResponseEntity.ok(ApiResponse.success("Instructor updated successfully", InstructorResponseDto.fromEntity(updated)));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure(ex.getMessage(), null));
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<InstructorResponseDto>> deleteInstructor(@PathVariable Long id) {
-        Instructor deleted = instructorService.deleteInstructorById(id);
-        return deleted == null
-                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<InstructorResponseDto>failure("Instructor not found", null))
-                : ResponseEntity.ok(ApiResponse.success("Instructor deleted successfully", InstructorResponseDto.fromEntity(deleted)));
+        try {
+            Instructor deleted = instructorService.deleteInstructorById(id);
+            return ResponseEntity.ok(ApiResponse.success("Instructor deleted successfully", InstructorResponseDto.fromEntity(deleted)));
+        } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure(ex.getMessage(), null));
+        }
     }
 }

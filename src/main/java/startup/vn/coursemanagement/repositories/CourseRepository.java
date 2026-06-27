@@ -40,28 +40,19 @@ public class CourseRepository {
         return saved;
     }
 
-    public Optional<Course> update(Long id, Course course) {
-        for (int i = 0; i < courses.size(); i++) {
-            if (courses.get(i).getId().equals(id)) {
-                Course updated = Course.builder()
-                        .id(id)
-                        .title(course.getTitle())
-                        .status(course.getStatus())
-                        .instructorId(course.getInstructorId())
-                        .build();
-                courses.set(i, updated);
-                return Optional.of(updated);
-            }
-        }
-        return Optional.empty();
+    public Course update(Course existing, Course course) {
+        Course updated = Course.builder()
+                .id(existing.getId())
+                .title(course.getTitle())
+                .status(course.getStatus())
+                .instructorId(course.getInstructorId())
+                .build();
+        courses.set(courses.indexOf(existing), updated);
+        return updated;
     }
 
-    public Optional<Course> deleteById(Long id) {
-        for (int i = 0; i < courses.size(); i++) {
-            if (courses.get(i).getId().equals(id)) {
-                return Optional.of(courses.remove(i));
-            }
-        }
-        return Optional.empty();
+    public Course delete(Course existing) {
+        courses.remove(existing);
+        return existing;
     }
 }
