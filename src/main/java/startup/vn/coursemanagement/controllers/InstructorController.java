@@ -16,6 +16,7 @@ import startup.vn.coursemanagement.Services.InstructorService;
 import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.InstructorRequestDto;
+import startup.vn.coursemanagement.models.dto.response.InstructorDetailDto;
 import startup.vn.coursemanagement.models.dto.response.InstructorResponseDto;
 import startup.vn.coursemanagement.models.entity.Instructor;
 
@@ -38,6 +39,14 @@ public class InstructorController {
                 instructorService.getAllInstructors().stream()
                         .map(InstructorResponseDto::fromEntity)
                         .toList()
+        ));
+    }
+
+    @GetMapping("/details")
+    public ResponseEntity<ApiResponse<List<InstructorDetailDto>>> getInstructorDetails() {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Instructor details retrieved successfully",
+                instructorService.getInstructorDetails()
         ));
     }
 
