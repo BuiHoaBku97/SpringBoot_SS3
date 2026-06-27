@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import startup.vn.coursemanagement.Services.InstructorService;
+import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.InstructorRequestDto;
 import startup.vn.coursemanagement.models.dto.response.InstructorResponseDto;
 import startup.vn.coursemanagement.models.entity.Instructor;
@@ -30,33 +31,45 @@ public class InstructorController {
     }
 
     @GetMapping
-    public ResponseEntity<List<InstructorResponseDto>> getInstructors() {
-        return ResponseEntity.ok(instructorService.getAllInstructors().stream()
-                .map(InstructorResponseDto::fromEntity)
-                .toList());
+    public ResponseEntity<ApiResponse<List<InstructorResponseDto>>> getInstructors() {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Instructors retrieved successfully",
+                instructorService.getAllInstructors().stream()
+                        .map(InstructorResponseDto::fromEntity)
+                        .toList()
+        ));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<InstructorResponseDto> getInstructorById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<InstructorResponseDto>> getInstructorById(@PathVariable Long id) {
         Instructor instructor = instructorService.getInstructorById(id);
-        return instructor == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(InstructorResponseDto.fromEntity(instructor));
+        return instructor == null
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<InstructorResponseDto>failure("Instructor not found", null))
+                : ResponseEntity.ok(ApiResponse.success("Instructor retrieved successfully", InstructorResponseDto.fromEntity(instructor)));
     }
 
     @PostMapping
-    public ResponseEntity<InstructorResponseDto> createInstructor(@Valid @RequestBody InstructorRequestDto request) {
+    public ResponseEntity<ApiResponse<InstructorResponseDto>> createInstructor(@Valid @RequestBody InstructorRequestDto request) {
         Instructor created = instructorService.createInstructor(request.toEntity());
-        return ResponseEntity.status(HttpStatus.CREATED).body(InstructorResponseDto.fromEntity(created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
+                "Instructor created successfully",
+                InstructorResponseDto.fromEntity(created)
+        ));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<InstructorResponseDto> updateInstructor(@PathVariable Long id, @Valid @RequestBody InstructorRequestDto request) {
+    public ResponseEntity<ApiResponse<InstructorResponseDto>> updateInstructor(@PathVariable Long id, @Valid @RequestBody InstructorRequestDto request) {
         Instructor updated = instructorService.updateInstructor(id, request.toEntity());
-        return updated == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(InstructorResponseDto.fromEntity(updated));
+        return updated == null
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<InstructorResponseDto>failure("Instructor not found", null))
+                : ResponseEntity.ok(ApiResponse.success("Instructor updated successfully", InstructorResponseDto.fromEntity(updated)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<InstructorResponseDto> deleteInstructor(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<InstructorResponseDto>> deleteInstructor(@PathVariable Long id) {
         Instructor deleted = instructorService.deleteInstructorById(id);
-        return deleted == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(InstructorResponseDto.fromEntity(deleted));
+        return deleted == null
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<InstructorResponseDto>failure("Instructor not found", null))
+                : ResponseEntity.ok(ApiResponse.success("Instructor deleted successfully", InstructorResponseDto.fromEntity(deleted)));
     }
 }

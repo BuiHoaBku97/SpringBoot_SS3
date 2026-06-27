@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import startup.vn.coursemanagement.Services.CourseService;
+import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.CourseRequestDto;
 import startup.vn.coursemanagement.models.dto.response.CourseResponseDto;
 import startup.vn.coursemanagement.models.entity.Course;
@@ -30,33 +31,45 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<CourseResponseDto>> getCourses() {
-        return ResponseEntity.ok(courseService.getAllCourses().stream()
-                .map(CourseResponseDto::fromEntity)
-                .toList());
+    public ResponseEntity<ApiResponse<List<CourseResponseDto>>> getCourses() {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Courses retrieved successfully",
+                courseService.getAllCourses().stream()
+                        .map(CourseResponseDto::fromEntity)
+                        .toList()
+        ));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CourseResponseDto> getCourseById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CourseResponseDto>> getCourseById(@PathVariable Long id) {
         Course course = courseService.getCourseById(id);
-        return course == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(CourseResponseDto.fromEntity(course));
+        return course == null
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<CourseResponseDto>failure("Course not found", null))
+                : ResponseEntity.ok(ApiResponse.success("Course retrieved successfully", CourseResponseDto.fromEntity(course)));
     }
 
     @PostMapping
-    public ResponseEntity<CourseResponseDto> createCourse(@Valid @RequestBody CourseRequestDto request) {
+    public ResponseEntity<ApiResponse<CourseResponseDto>> createCourse(@Valid @RequestBody CourseRequestDto request) {
         Course created = courseService.createCourse(request.toEntity());
-        return ResponseEntity.status(HttpStatus.CREATED).body(CourseResponseDto.fromEntity(created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
+                "Course created successfully",
+                CourseResponseDto.fromEntity(created)
+        ));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CourseResponseDto> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseRequestDto request) {
+    public ResponseEntity<ApiResponse<CourseResponseDto>> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseRequestDto request) {
         Course updated = courseService.updateCourse(id, request.toEntity());
-        return updated == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(CourseResponseDto.fromEntity(updated));
+        return updated == null
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<CourseResponseDto>failure("Course not found", null))
+                : ResponseEntity.ok(ApiResponse.success("Course updated successfully", CourseResponseDto.fromEntity(updated)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CourseResponseDto> deleteCourse(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<CourseResponseDto>> deleteCourse(@PathVariable Long id) {
         Course deleted = courseService.deleteCourseById(id);
-        return deleted == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(CourseResponseDto.fromEntity(deleted));
+        return deleted == null
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<CourseResponseDto>failure("Course not found", null))
+                : ResponseEntity.ok(ApiResponse.success("Course deleted successfully", CourseResponseDto.fromEntity(deleted)));
     }
 }

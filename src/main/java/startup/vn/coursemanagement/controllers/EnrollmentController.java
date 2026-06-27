@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import startup.vn.coursemanagement.Services.EnrollmentService;
+import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.EnrollmentRequestDto;
 import startup.vn.coursemanagement.models.dto.response.EnrollmentResponseDto;
 import startup.vn.coursemanagement.models.entity.Enrollment;
@@ -30,33 +31,45 @@ public class EnrollmentController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EnrollmentResponseDto>> getEnrollments() {
-        return ResponseEntity.ok(enrollmentService.getAllEnrollments().stream()
-                .map(EnrollmentResponseDto::fromEntity)
-                .toList());
+    public ResponseEntity<ApiResponse<List<EnrollmentResponseDto>>> getEnrollments() {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Enrollments retrieved successfully",
+                enrollmentService.getAllEnrollments().stream()
+                        .map(EnrollmentResponseDto::fromEntity)
+                        .toList()
+        ));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EnrollmentResponseDto> getEnrollmentById(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<EnrollmentResponseDto>> getEnrollmentById(@PathVariable Long id) {
         Enrollment enrollment = enrollmentService.getEnrollmentById(id);
-        return enrollment == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(EnrollmentResponseDto.fromEntity(enrollment));
+        return enrollment == null
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<EnrollmentResponseDto>failure("Enrollment not found", null))
+                : ResponseEntity.ok(ApiResponse.success("Enrollment retrieved successfully", EnrollmentResponseDto.fromEntity(enrollment)));
     }
 
     @PostMapping
-    public ResponseEntity<EnrollmentResponseDto> createEnrollment(@Valid @RequestBody EnrollmentRequestDto request) {
+    public ResponseEntity<ApiResponse<EnrollmentResponseDto>> createEnrollment(@Valid @RequestBody EnrollmentRequestDto request) {
         Enrollment created = enrollmentService.createEnrollment(request.toEntity());
-        return ResponseEntity.status(HttpStatus.CREATED).body(EnrollmentResponseDto.fromEntity(created));
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
+                "Enrollment created successfully",
+                EnrollmentResponseDto.fromEntity(created)
+        ));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<EnrollmentResponseDto> updateEnrollment(@PathVariable Long id, @Valid @RequestBody EnrollmentRequestDto request) {
+    public ResponseEntity<ApiResponse<EnrollmentResponseDto>> updateEnrollment(@PathVariable Long id, @Valid @RequestBody EnrollmentRequestDto request) {
         Enrollment updated = enrollmentService.updateEnrollment(id, request.toEntity());
-        return updated == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(EnrollmentResponseDto.fromEntity(updated));
+        return updated == null
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<EnrollmentResponseDto>failure("Enrollment not found", null))
+                : ResponseEntity.ok(ApiResponse.success("Enrollment updated successfully", EnrollmentResponseDto.fromEntity(updated)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<EnrollmentResponseDto> deleteEnrollment(@PathVariable Long id) {
+    public ResponseEntity<ApiResponse<EnrollmentResponseDto>> deleteEnrollment(@PathVariable Long id) {
         Enrollment deleted = enrollmentService.deleteEnrollmentById(id);
-        return deleted == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(EnrollmentResponseDto.fromEntity(deleted));
+        return deleted == null
+                ? ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.<EnrollmentResponseDto>failure("Enrollment not found", null))
+                : ResponseEntity.ok(ApiResponse.success("Enrollment deleted successfully", EnrollmentResponseDto.fromEntity(deleted)));
     }
 }
