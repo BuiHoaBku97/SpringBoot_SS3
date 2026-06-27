@@ -13,9 +13,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import startup.vn.coursemanagement.Services.EnrollmentService;
+import startup.vn.coursemanagement.exceptions.CourseNotActiveException;
 import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
+import startup.vn.coursemanagement.models.dto.request.EnrollCourseRequestDto;
 import startup.vn.coursemanagement.models.dto.request.EnrollmentRequestDto;
+import startup.vn.coursemanagement.models.dto.response.EnrollmentDetailDto;
 import startup.vn.coursemanagement.models.dto.response.EnrollmentResponseDto;
 import startup.vn.coursemanagement.models.entity.Enrollment;
 
@@ -76,6 +79,20 @@ public class EnrollmentController {
             Enrollment deleted = enrollmentService.deleteEnrollmentById(id);
             return ResponseEntity.ok(ApiResponse.success("Enrollment deleted successfully", EnrollmentResponseDto.fromEntity(deleted)));
         } catch (ResourceNotFoundException ex) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure(ex.getMessage(), null));
+        }
+    }
+
+    @PostMapping("/enroll-course")
+    public ResponseEntity<ApiResponse<EnrollmentDetailDto>> enrollCourse(@Valid @RequestBody EnrollCourseRequestDto enrollCourseRequestDto ){
+        try{
+            var response = enrollmentService.enrollCourse(enrollCourseRequestDto.toEntity());
+            return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Course enrolled successfully", response));
+        }
+        catch (CourseNotActiveException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiResponse.failure(ex.getMessage(), null));
+        }
+        catch (ResourceNotFoundException ex) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.failure(ex.getMessage(), null));
         }
     }
