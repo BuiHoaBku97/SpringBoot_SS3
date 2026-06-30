@@ -12,7 +12,7 @@ import java.util.Optional;
 public class CourseRepository {
     private final List<Course> courses = new ArrayList<>(List.of(
             Course.builder().id(1L).title("Spring Boot Basics").status(CourseStatus.ACTIVE).instructorId(1L).build(),
-            Course.builder().id(2L).title("Java OOP").status(CourseStatus.DRAFT).instructorId(2L).build()
+            Course.builder().id(2L).title("Java OOP").status(CourseStatus.CANCELLED).instructorId(2L).build()
     ));
 
     public List<Course> findAll() {
