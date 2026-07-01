@@ -3,18 +3,23 @@ package startup.vn.coursemanagement.Services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
+import startup.vn.coursemanagement.models.dto.request.CourseRequestDto;
 import startup.vn.coursemanagement.models.entity.Course;
+import startup.vn.coursemanagement.models.entity.Instructor;
 import startup.vn.coursemanagement.repositories.CourseRepository;
+import startup.vn.coursemanagement.repositories.InstructorRepository;
 
 import java.util.List;
 
 @Service
 public class CourseService {
     private final CourseRepository courseRepository;
+    private final InstructorRepository instructorRepository;
 
     @Autowired
-    public CourseService(CourseRepository courseRepository) {
+    public CourseService(CourseRepository courseRepository, InstructorRepository instructorRepository) {
         this.courseRepository = courseRepository;
+        this.instructorRepository = instructorRepository;
     }
 
     public List<Course> getAllCourses() {
@@ -26,19 +31,29 @@ public class CourseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
     }
 
-    public Course createCourse(Course course) {
-        return courseRepository.create(course);
+    public Course createCourse(CourseRequestDto request) {
+        Instructor instructor = instructorRepository.findById(request.instructorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Instructor not found"));
+
+        Course course = request.toEntity();
+        course.setInstructor(instructor);
+        return courseRepository.save(course);
     }
 
-    public Course updateCourse(Long id, Course course) {
-        Course existing = courseRepository.findById(id)
+    public Course updateCourse(Long id, CourseRequestDto request) {
+        Instructor instructor = instructorRepository.findById(request.instructorId())
+                .orElseThrow(() -> new ResourceNotFoundException("Instructor not found"));
+
+        courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
-        return courseRepository.update(existing, course);
+        Course course = request.toEntity();
+        course.setInstructor(instructor);
+        return courseRepository.save(course);
     }
 
-    public Course deleteCourseById(Long id) {
-        Course existing = courseRepository.findById(id)
+    public void deleteCourseById(Long id) {
+        courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
-        return courseRepository.delete(existing);
+        courseRepository.deleteById(id);
     }
 }

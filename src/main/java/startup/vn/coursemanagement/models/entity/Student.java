@@ -16,21 +16,21 @@ import java.util.List;
 @Data
 @Builder
 @Entity
-@Table(name = "instructors")
-public class Instructor {
+@Table(name = "students")
+public class Student {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "name", length = 100, nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @OneToMany(mappedBy = "instructor")
+    @OneToMany(mappedBy = "student")
     @JsonIgnore
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    private List<Course> courses;
+    private List<StudentEnrollment> enrollments;
 }

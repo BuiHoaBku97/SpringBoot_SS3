@@ -5,6 +5,7 @@ import startup.vn.coursemanagement.models.entity.CourseStatus;
 
 public record CourseResponseDto(Long id, String title, CourseStatus status, Long instructorId) {
     public static CourseResponseDto fromEntity(Course course) {
-        return new CourseResponseDto(course.getId(), course.getTitle(), course.getStatus(), course.getInstructorId());
+        Long instructorId = course.getInstructor() != null ? course.getInstructor().getId() : null;
+        return new CourseResponseDto(course.getId(), course.getTitle(), course.getStatus(), instructorId);
     }
 }

@@ -1,6 +1,5 @@
 package startup.vn.coursemanagement.models.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,28 +8,26 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.List;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
 @Builder
 @Entity
-@Table(name = "instructors")
-public class Instructor {
+@Table(name = "student_enrollments")
+public class StudentEnrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String name;
-
-    @Column(nullable = false)
-    private String email;
-
-    @OneToMany(mappedBy = "instructor")
-    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "student_id", nullable = false)
     @EqualsAndHashCode.Exclude
     @ToString.Exclude
-    private List<Course> courses;
+    private Student student;
+
+    @ManyToOne
+    @JoinColumn(name = "course_id", nullable = false)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Course course;
 }

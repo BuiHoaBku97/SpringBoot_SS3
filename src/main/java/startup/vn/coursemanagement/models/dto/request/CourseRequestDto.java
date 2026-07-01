@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import startup.vn.coursemanagement.models.entity.Course;
 import startup.vn.coursemanagement.models.entity.CourseStatus;
+import startup.vn.coursemanagement.models.entity.Instructor;
 
 public record CourseRequestDto(
         @NotBlank(message = "title is required")
@@ -17,7 +18,7 @@ public record CourseRequestDto(
         return Course.builder()
                 .title(title)
                 .status(status)
-                .instructorId(instructorId)
+                .instructor(Instructor.builder().id(instructorId).build())
                 .build();
     }
 }

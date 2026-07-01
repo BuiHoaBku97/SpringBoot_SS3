@@ -1,10 +1,15 @@
 package startup.vn.coursemanagement.models.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,6 +29,15 @@ public class Course {
     @Enumerated(EnumType.STRING)
     private CourseStatus status;
 
-    @Column(name = "instructor_id", nullable = false)
-    private Long instructorId;
+    @ManyToOne
+    @JoinColumn(name = "instructor_id", nullable = false)
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private Instructor instructor;
+
+    @OneToMany(mappedBy = "course")
+    @JsonIgnore
+    @EqualsAndHashCode.Exclude
+    @ToString.Exclude
+    private List<StudentEnrollment> enrollments;
 }
