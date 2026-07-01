@@ -6,6 +6,6 @@ public record InstructorDetailDto(
         Long id,
         String name,
         String email,
-        List<CourseResponseDto> courses
+        List<CourseResponse> courses
 ) {
 }

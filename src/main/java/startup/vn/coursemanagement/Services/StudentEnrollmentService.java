@@ -5,12 +5,13 @@ import org.springframework.stereotype.Service;
 import startup.vn.coursemanagement.exceptions.CourseNotActiveException;
 import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.dto.response.EnrollmentDetailDto;
-import startup.vn.coursemanagement.models.dto.response.CourseResponseDto;
 import startup.vn.coursemanagement.models.entity.Course;
 import startup.vn.coursemanagement.models.entity.CourseStatus;
 import startup.vn.coursemanagement.models.entity.Student;
 import startup.vn.coursemanagement.models.entity.StudentEnrollment;
+import startup.vn.coursemanagement.mappers.CourseMapper;
 import startup.vn.coursemanagement.repositories.*;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
@@ -20,13 +21,19 @@ public class StudentEnrollmentService {
     private final CourseRepository courseRepository;
     private final InstructorRepository instructorRepository;
     private final StudentRepository studentRepository;
+    private final CourseMapper courseMapper;
 
     @Autowired
-    public StudentEnrollmentService(StudentEnrollmentRepository studentEnrollmentRepository, CourseRepository courseRepository, InstructorRepository instructorRepository, StudentRepository studentRepository) {
+    public StudentEnrollmentService(StudentEnrollmentRepository studentEnrollmentRepository, CourseRepository courseRepository, InstructorRepository instructorRepository, StudentRepository studentRepository, CourseMapper courseMapper) {
         this.studentEnrollmentRepository = studentEnrollmentRepository;
         this.courseRepository = courseRepository;
         this.instructorRepository = instructorRepository;
         this.studentRepository = studentRepository;
+        this.courseMapper = courseMapper;
+    }
+
+    public StudentEnrollmentService(StudentEnrollmentRepository studentEnrollmentRepository, CourseRepository courseRepository, InstructorRepository instructorRepository, StudentRepository studentRepository) {
+        this(studentEnrollmentRepository, courseRepository, instructorRepository, studentRepository, Mappers.getMapper(CourseMapper.class));
     }
 
 
@@ -88,7 +95,7 @@ public class StudentEnrollmentService {
                 newEnrollment.getId(),
                 newEnrollment.getStudent().getId(),
                 newEnrollment.getStudent().getName(),
-                CourseResponseDto.fromEntity(newEnrollment.getCourse())
+                courseMapper.toDto(newEnrollment.getCourse())
         );
     }
 

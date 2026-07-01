@@ -5,10 +5,13 @@ import org.springframework.stereotype.Service;
 import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.dto.request.CourseCreateRequest;
 import startup.vn.coursemanagement.models.dto.request.CourseUpdateRequest;
+import startup.vn.coursemanagement.models.dto.response.CourseResponse;
 import startup.vn.coursemanagement.models.entity.Course;
 import startup.vn.coursemanagement.models.entity.Instructor;
+import startup.vn.coursemanagement.mappers.CourseMapper;
 import startup.vn.coursemanagement.repositories.CourseRepository;
 import startup.vn.coursemanagement.repositories.InstructorRepository;
+import org.mapstruct.factory.Mappers;
 
 import java.util.List;
 
@@ -16,32 +19,41 @@ import java.util.List;
 public class CourseService {
     private final CourseRepository courseRepository;
     private final InstructorRepository instructorRepository;
+    private final CourseMapper courseMapper;
 
     @Autowired
-    public CourseService(CourseRepository courseRepository, InstructorRepository instructorRepository) {
+    public CourseService(CourseRepository courseRepository, InstructorRepository instructorRepository, CourseMapper courseMapper) {
         this.courseRepository = courseRepository;
         this.instructorRepository = instructorRepository;
+        this.courseMapper = courseMapper;
     }
 
-    public List<Course> getAllCourses() {
-        return courseRepository.findAll();
+    public CourseService(CourseRepository courseRepository, InstructorRepository instructorRepository) {
+        this(courseRepository, instructorRepository, Mappers.getMapper(CourseMapper.class));
     }
 
-    public Course getCourseById(Long id) {
-        return courseRepository.findById(id)
+    public List<CourseResponse> getAllCourses() {
+        return courseRepository.findAll().stream()
+                .map(courseMapper::toDto)
+                .toList();
+    }
+
+    public CourseResponse getCourseById(Long id) {
+        Course course = courseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        return courseMapper.toDto(course);
     }
 
-    public Course createCourse(CourseCreateRequest request) {
+    public CourseResponse createCourse(CourseCreateRequest request) {
         Instructor instructor = instructorRepository.findById(request.instructorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Instructor not found"));
 
         Course course = request.toEntity();
         course.setInstructor(instructor);
-        return courseRepository.save(course);
+        return courseMapper.toDto(courseRepository.save(course));
     }
 
-    public Course updateCourse(Long id, CourseUpdateRequest request) {
+    public CourseResponse updateCourse(Long id, CourseUpdateRequest request) {
         Instructor instructor = instructorRepository.findById(request.instructorId())
                 .orElseThrow(() -> new ResourceNotFoundException("Instructor not found"));
 
@@ -50,7 +62,7 @@ public class CourseService {
         Course course = request.toEntity();
         course.setId(id);
         course.setInstructor(instructor);
-        return courseRepository.save(course);
+        return courseMapper.toDto(courseRepository.save(course));
     }
 
     public void deleteCourseById(Long id) {

@@ -16,8 +16,7 @@ import startup.vn.coursemanagement.Services.CourseService;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.CourseCreateRequest;
 import startup.vn.coursemanagement.models.dto.request.CourseUpdateRequest;
-import startup.vn.coursemanagement.models.dto.response.CourseResponseDto;
-import startup.vn.coursemanagement.models.entity.Course;
+import startup.vn.coursemanagement.models.dto.response.CourseResponse;
 
 import java.util.List;
 
@@ -32,34 +31,31 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CourseResponseDto>>> getCourses() {
+    public ResponseEntity<ApiResponse<List<CourseResponse>>> getCourses() {
         return ResponseEntity.ok(ApiResponse.success(
                 "Courses retrieved successfully",
-                courseService.getAllCourses().stream()
-                        .map(CourseResponseDto::fromEntity)
-                        .toList()
+                courseService.getAllCourses()
         ));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<CourseResponseDto>> getCourseById(@PathVariable Long id) {
-        Course course = courseService.getCourseById(id);
-        return ResponseEntity.ok(ApiResponse.success("Course retrieved successfully", CourseResponseDto.fromEntity(course)));
+    public ResponseEntity<ApiResponse<CourseResponse>> getCourseById(@PathVariable Long id) {
+        return ResponseEntity.ok(ApiResponse.success("Course retrieved successfully", courseService.getCourseById(id)));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CourseResponseDto>> createCourse(@Valid @RequestBody CourseCreateRequest request) {
-        Course created = courseService.createCourse(request);
+    public ResponseEntity<ApiResponse<CourseResponse>> createCourse(@Valid @RequestBody CourseCreateRequest request) {
+        var created = courseService.createCourse(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
                 "Course created successfully",
-                CourseResponseDto.fromEntity(created)
+                created
         ));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseUpdateRequest request) {
-        courseService.updateCourse(id, request);
-        return ResponseEntity.ok(ApiResponse.success("Course updated successfully", null));
+    public ResponseEntity<ApiResponse<CourseResponse>> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseUpdateRequest request) {
+        var updated = courseService.updateCourse(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Course updated successfully", updated));
     }
 
     @DeleteMapping("/{id}")
