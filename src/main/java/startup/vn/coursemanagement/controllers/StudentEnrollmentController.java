@@ -14,16 +14,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import startup.vn.coursemanagement.Services.StudentEnrollmentService;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
-import startup.vn.coursemanagement.models.dto.request.EnrollCourseRequestDto;
-import startup.vn.coursemanagement.models.dto.request.EnrollmentRequestDto;
-import startup.vn.coursemanagement.models.dto.response.EnrollmentDetailDto;
+import startup.vn.coursemanagement.models.dto.request.StudentEnrollmentRequestDto;
 import startup.vn.coursemanagement.models.dto.response.EnrollmentResponseDto;
 import startup.vn.coursemanagement.models.entity.StudentEnrollment;
 
 import java.util.List;
 
 @Controller
-@RequestMapping("/api/enrollments")
+@RequestMapping("/api/students-enrollments")
 public class StudentEnrollmentController {
     private final StudentEnrollmentService enrollmentService;
 
@@ -49,8 +47,8 @@ public class StudentEnrollmentController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<EnrollmentResponseDto>> createEnrollment(@Valid @RequestBody EnrollmentRequestDto request) {
-        StudentEnrollment created = enrollmentService.createEnrollment(request.toEntity());
+    public ResponseEntity<ApiResponse<EnrollmentResponseDto>> createEnrollment(@Valid @RequestBody StudentEnrollmentRequestDto request) {
+        StudentEnrollment created = enrollmentService.enrollStudent(request.studentId(), request.courseId());
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
                 "Enrollment created successfully",
                 EnrollmentResponseDto.fromEntity(created)
@@ -58,20 +56,14 @@ public class StudentEnrollmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<EnrollmentResponseDto>> updateEnrollment(@PathVariable Long id, @Valid @RequestBody EnrollmentRequestDto request) {
-        StudentEnrollment updated = enrollmentService.updateEnrollment(id, request.toEntity());
-        return ResponseEntity.ok(ApiResponse.success("Enrollment updated successfully", EnrollmentResponseDto.fromEntity(updated)));
+    public ResponseEntity<ApiResponse<Void>> updateEnrollment(@PathVariable Long id, @Valid @RequestBody StudentEnrollmentRequestDto request) {
+        enrollmentService.updateEnrollment(id, request.toEntity());
+        return ResponseEntity.ok(ApiResponse.success("Enrollment updated successfully", null));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEnrollment(@PathVariable Long id) {
         enrollmentService.deleteEnrollmentById(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @PostMapping("/enroll-course")
-    public ResponseEntity<ApiResponse<EnrollmentDetailDto>> enrollCourse(@Valid @RequestBody EnrollCourseRequestDto enrollCourseRequestDto) {
-        var response = enrollmentService.enrollCourse(enrollCourseRequestDto.toEntity());
-        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Course enrolled successfully", response));
     }
 }

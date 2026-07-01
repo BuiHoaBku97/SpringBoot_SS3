@@ -44,10 +44,11 @@ public class StudentEnrollmentService {
     }
 
     public StudentEnrollment updateEnrollment(Long id, StudentEnrollment enrollment) {
-        StudentEnrollment existing = studentEnrollmentRepository.findById(id)
+        studentEnrollmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
-        enrollment.setId(id);
-        return studentEnrollmentRepository.save(resolveEnrollment(enrollment));
+        StudentEnrollment resolvedEnrollment = resolveEnrollment(enrollment);
+        resolvedEnrollment.setId(id);
+        return studentEnrollmentRepository.save(resolvedEnrollment);
     }
 
     public void deleteEnrollmentById(Long id) {
@@ -56,15 +57,12 @@ public class StudentEnrollmentService {
         studentEnrollmentRepository.delete(existing);
     }
 
-    public EnrollmentDetailDto enrollCourse(StudentEnrollment enrollment){
-        StudentEnrollment resolvedEnrollment = resolveEnrollment(enrollment);
-        Course course = resolvedEnrollment.getCourse();
-        Student student = resolvedEnrollment.getStudent();
+    public StudentEnrollment enrollStudent(Long studentId, Long courseId) {
+        StudentEnrollment enrollment = buildResolvedEnrollment(studentId, courseId);
+        Course course = enrollment.getCourse();
+        Student student = enrollment.getStudent();
 
-        course = courseRepository.findById(course.getId())
-                .orElseThrow( () -> new ResourceNotFoundException("Course not found") );
-
-        if ( course.getStatus() != CourseStatus.ACTIVE) {
+        if (course.getStatus() != CourseStatus.ACTIVE) {
             throw new CourseNotActiveException("Course is not active");
         }
 
@@ -75,27 +73,34 @@ public class StudentEnrollmentService {
         instructorRepository.findById(course.getInstructor().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Instructor not found"));
 
-        student = studentRepository.findById(student.getId())
+        studentRepository.findById(student.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
 
-        var newEnrollment = studentEnrollmentRepository.save(StudentEnrollment.builder()
+        return studentEnrollmentRepository.save(StudentEnrollment.builder()
                 .student(student)
                 .course(course)
                 .build());
+    }
+
+    public EnrollmentDetailDto enrollCourse(StudentEnrollment enrollment){
+        StudentEnrollment newEnrollment = enrollStudent(enrollment.getStudent().getId(), enrollment.getCourse().getId());
         return new EnrollmentDetailDto(
                 newEnrollment.getId(),
                 newEnrollment.getStudent().getId(),
                 newEnrollment.getStudent().getName(),
-                CourseResponseDto.fromEntity(course)
+                CourseResponseDto.fromEntity(newEnrollment.getCourse())
         );
     }
 
     private StudentEnrollment resolveEnrollment(StudentEnrollment enrollment) {
-        Student student = studentRepository.findById(enrollment.getStudent().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
-        Course course = courseRepository.findById(enrollment.getCourse().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
+        return buildResolvedEnrollment(enrollment.getStudent().getId(), enrollment.getCourse().getId());
+    }
 
+    private StudentEnrollment buildResolvedEnrollment(Long studentId, Long courseId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Student not found"));
+        Course course = courseRepository.findById(courseId)
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found"));
         return StudentEnrollment.builder()
                 .student(student)
                 .course(course)

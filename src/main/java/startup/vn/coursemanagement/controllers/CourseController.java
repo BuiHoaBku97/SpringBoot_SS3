@@ -14,7 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import startup.vn.coursemanagement.Services.CourseService;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
-import startup.vn.coursemanagement.models.dto.request.CourseRequestDto;
+import startup.vn.coursemanagement.models.dto.request.CourseCreateRequest;
+import startup.vn.coursemanagement.models.dto.request.CourseUpdateRequest;
 import startup.vn.coursemanagement.models.dto.response.CourseResponseDto;
 import startup.vn.coursemanagement.models.entity.Course;
 
@@ -47,7 +48,7 @@ public class CourseController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CourseResponseDto>> createCourse(@Valid @RequestBody CourseRequestDto request) {
+    public ResponseEntity<ApiResponse<CourseResponseDto>> createCourse(@Valid @RequestBody CourseCreateRequest request) {
         Course created = courseService.createCourse(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success(
                 "Course created successfully",
@@ -56,9 +57,9 @@ public class CourseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<CourseResponseDto>> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseRequestDto request) {
-        Course updated = courseService.updateCourse(id, request);
-        return ResponseEntity.ok(ApiResponse.success("Course updated successfully", CourseResponseDto.fromEntity(updated)));
+    public ResponseEntity<ApiResponse<Void>> updateCourse(@PathVariable Long id, @Valid @RequestBody CourseUpdateRequest request) {
+        courseService.updateCourse(id, request);
+        return ResponseEntity.ok(ApiResponse.success("Course updated successfully", null));
     }
 
     @DeleteMapping("/{id}")
