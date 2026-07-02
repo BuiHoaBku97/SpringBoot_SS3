@@ -20,6 +20,7 @@ import startup.vn.coursemanagement.models.dto.request.CourseCreateRequest;
 import startup.vn.coursemanagement.models.dto.request.CourseUpdateRequest;
 import startup.vn.coursemanagement.models.dto.response.CourseResponse;
 import startup.vn.coursemanagement.models.dto.response.PageResponse;
+import startup.vn.coursemanagement.models.entity.CourseStatus;
 
 @RestController
 @RequestMapping({"/api/courses", "/courses"})
@@ -36,11 +37,12 @@ public class CourseController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String sortBy,
-            @RequestParam(defaultValue = "DESC") Sort.Direction direction
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction,
+            @RequestParam(defaultValue = "ACTIVE") CourseStatus status
     ) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Courses retrieved successfully",
-                courseService.getPagedCourses(page, size, sortBy, direction)
+                courseService.getPagedCoursesByStatus(page, size, sortBy, direction, status)
         ));
     }
 
