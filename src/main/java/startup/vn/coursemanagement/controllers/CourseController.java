@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +19,7 @@ import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.CourseCreateRequest;
 import startup.vn.coursemanagement.models.dto.request.CourseUpdateRequest;
 import startup.vn.coursemanagement.models.dto.response.CourseResponse;
+import startup.vn.coursemanagement.models.dto.response.PageResponse;
 
 @RestController
 @RequestMapping({"/api/courses", "/courses"})
@@ -32,7 +32,7 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<Page<CourseResponse>>> getCourses(
+    public ResponseEntity<ApiResponse<PageResponse<CourseResponse>>> getCourses(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) String sortBy,

@@ -10,6 +10,7 @@ import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.dto.request.CourseCreateRequest;
 import startup.vn.coursemanagement.models.dto.request.CourseUpdateRequest;
 import startup.vn.coursemanagement.models.dto.response.CourseResponse;
+import startup.vn.coursemanagement.models.dto.response.PageResponse;
 import startup.vn.coursemanagement.models.entity.Course;
 import startup.vn.coursemanagement.models.entity.Instructor;
 import startup.vn.coursemanagement.mappers.CourseMapper;
@@ -36,16 +37,24 @@ public class CourseService {
         this(courseRepository, instructorRepository, Mappers.getMapper(CourseMapper.class));
     }
 
-    public Page<CourseResponse> getPagedCourses(int page, int size, String sortBy, Sort.Direction direction) {
+    public PageResponse<CourseResponse> getPagedCourses(int page, int size, String sortBy, Sort.Direction direction) {
         int safePage = Math.max(page, 0);
         int safeSize = size > 0 ? size : DEFAULT_PAGE_SIZE;
         String resolvedSortBy = (sortBy == null || sortBy.isBlank()) ? "id" : sortBy;
 
         Pageable pageable = PageRequest.of(safePage, safeSize, Sort.by(direction, resolvedSortBy));
-        return courseRepository.findAll(pageable).map(courseMapper::toDto);
+        Page<CourseResponse> mappedPage = courseRepository.findAll(pageable).map(courseMapper::toDto);
+        return new PageResponse<>(
+                mappedPage.getContent(),
+                mappedPage.getNumber(),
+                mappedPage.getSize(),
+                Math.toIntExact(mappedPage.getTotalElements()),
+                mappedPage.getTotalPages(),
+                mappedPage.isLast()
+        );
     }
 
-    public Page<CourseResponse> getAllCourses() {
+    public PageResponse<CourseResponse> getAllCourses() {
         return getPagedCourses(0, DEFAULT_PAGE_SIZE, null, Sort.Direction.DESC);
     }
 
