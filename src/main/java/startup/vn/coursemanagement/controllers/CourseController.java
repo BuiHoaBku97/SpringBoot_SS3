@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import startup.vn.coursemanagement.Services.CourseService;
+import startup.vn.coursemanagement.services.CourseService;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.CourseCreateRequest;
 import startup.vn.coursemanagement.models.dto.request.CourseUpdateRequest;

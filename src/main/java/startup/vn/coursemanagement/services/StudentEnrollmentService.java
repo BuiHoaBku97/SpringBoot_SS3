@@ -1,4 +1,4 @@
-package startup.vn.coursemanagement.Services;
+package startup.vn.coursemanagement.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

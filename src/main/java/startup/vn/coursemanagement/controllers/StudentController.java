@@ -8,7 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import startup.vn.coursemanagement.Services.StudentService;
+import startup.vn.coursemanagement.services.StudentService;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.StudentCreateRequest;
 import startup.vn.coursemanagement.models.dto.response.StudentResponseDto;
