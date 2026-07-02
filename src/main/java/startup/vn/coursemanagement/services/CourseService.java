@@ -1,6 +1,10 @@
 package startup.vn.coursemanagement.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.dto.request.CourseCreateRequest;
@@ -13,10 +17,10 @@ import startup.vn.coursemanagement.repositories.CourseRepository;
 import startup.vn.coursemanagement.repositories.InstructorRepository;
 import org.mapstruct.factory.Mappers;
 
-import java.util.List;
-
 @Service
 public class CourseService {
+    private static final int DEFAULT_PAGE_SIZE = 10;
+
     private final CourseRepository courseRepository;
     private final InstructorRepository instructorRepository;
     private final CourseMapper courseMapper;
@@ -32,10 +36,17 @@ public class CourseService {
         this(courseRepository, instructorRepository, Mappers.getMapper(CourseMapper.class));
     }
 
-    public List<CourseResponse> getAllCourses() {
-        return courseRepository.findAll().stream()
-                .map(courseMapper::toDto)
-                .toList();
+    public Page<CourseResponse> getPagedCourses(int page, int size, String sortBy, Sort.Direction direction) {
+        int safePage = Math.max(page, 0);
+        int safeSize = size > 0 ? size : DEFAULT_PAGE_SIZE;
+        String resolvedSortBy = (sortBy == null || sortBy.isBlank()) ? "id" : sortBy;
+
+        Pageable pageable = PageRequest.of(safePage, safeSize, Sort.by(direction, resolvedSortBy));
+        return courseRepository.findAll(pageable).map(courseMapper::toDto);
+    }
+
+    public Page<CourseResponse> getAllCourses() {
+        return getPagedCourses(0, DEFAULT_PAGE_SIZE, null, Sort.Direction.DESC);
     }
 
     public CourseResponse getCourseById(Long id) {

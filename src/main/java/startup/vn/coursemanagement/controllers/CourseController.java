@@ -4,24 +4,25 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import startup.vn.coursemanagement.services.CourseService;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.request.CourseCreateRequest;
 import startup.vn.coursemanagement.models.dto.request.CourseUpdateRequest;
 import startup.vn.coursemanagement.models.dto.response.CourseResponse;
 
-import java.util.List;
-
-@Controller
-@RequestMapping("/api/courses")
+@RestController
+@RequestMapping({"/api/courses", "/courses"})
 public class CourseController {
     private final CourseService courseService;
 
@@ -31,10 +32,15 @@ public class CourseController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<CourseResponse>>> getCourses() {
+    public ResponseEntity<ApiResponse<Page<CourseResponse>>> getCourses(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sortBy,
+            @RequestParam(defaultValue = "DESC") Sort.Direction direction
+    ) {
         return ResponseEntity.ok(ApiResponse.success(
                 "Courses retrieved successfully",
-                courseService.getAllCourses()
+                courseService.getPagedCourses(page, size, sortBy, direction)
         ));
     }
 
