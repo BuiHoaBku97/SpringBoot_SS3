@@ -40,17 +40,30 @@ public class CourseService {
     }
 
     public PageResponse<CourseResponseV2> getPagedCourses(int page, int size, String sortBy, Sort.Direction direction) {
-        return getPagedCoursesByStatus(page, size, sortBy, direction, null);
+        return getPagedCourses(page, size, sortBy, direction, null, null);
     }
 
-    public PageResponse<CourseResponseV2> getPagedCoursesByStatus(int page, int size, String sortBy, Sort.Direction direction, CourseStatus status) {
+    public PageResponse<CourseResponseV2> getPagedCourses(
+            int page,
+            int size,
+            String sortBy,
+            Sort.Direction direction,
+            String keyword,
+            CourseStatus status
+    ) {
         int safePage = Math.max(page, 0);
         int safeSize = size > 0 ? size : DEFAULT_PAGE_SIZE;
-        String resolvedSortBy = (sortBy == null || sortBy.isBlank()) ? "id" : sortBy;
-        CourseStatus resolvedStatus = status == null ? CourseStatus.ACTIVE : status;
 
-        Pageable pageable = PageRequest.of(safePage, safeSize, Sort.by(direction, resolvedSortBy));
-        Page<CourseResponseV2> mappedPage = courseRepository.findAllByStatus(resolvedStatus, pageable);
+        Pageable pageable = direction == null
+                ? PageRequest.of(safePage, safeSize)
+                : PageRequest.of(
+                        safePage,
+                        safeSize,
+                        Sort.by(direction, (sortBy == null || sortBy.isBlank()) ? "id" : sortBy)
+                );
+
+        String resolvedKeyword = (keyword == null || keyword.isBlank()) ? null : keyword.trim();
+        Page<CourseResponseV2> mappedPage = courseRepository.findAllByFilters(resolvedKeyword, status, pageable);
         return new PageResponse<>(
                 mappedPage.getContent(),
                 mappedPage.getNumber(),
@@ -62,7 +75,7 @@ public class CourseService {
     }
 
     public PageResponse<CourseResponseV2> getAllCourses() {
-        return getPagedCoursesByStatus(0, DEFAULT_PAGE_SIZE, null, Sort.Direction.DESC, CourseStatus.ACTIVE);
+        return getPagedCourses(0, DEFAULT_PAGE_SIZE, null, null, null, null);
     }
 
     public CourseResponse getCourseById(Long id) {
