@@ -4,14 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import startup.vn.coursemanagement.exceptions.CourseNotActiveException;
 import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
-import startup.vn.coursemanagement.models.dto.response.EnrollmentDetailDto;
 import startup.vn.coursemanagement.models.entity.Course;
 import startup.vn.coursemanagement.models.entity.CourseStatus;
 import startup.vn.coursemanagement.models.entity.Student;
 import startup.vn.coursemanagement.models.entity.StudentEnrollment;
-import startup.vn.coursemanagement.mappers.CourseMapper;
-import startup.vn.coursemanagement.repositories.*;
-import org.mapstruct.factory.Mappers;
+import startup.vn.coursemanagement.repositories.CourseRepository;
+import startup.vn.coursemanagement.repositories.InstructorRepository;
+import startup.vn.coursemanagement.repositories.StudentEnrollmentRepository;
+import startup.vn.coursemanagement.repositories.StudentRepository;
 
 import java.util.List;
 
@@ -21,21 +21,19 @@ public class StudentEnrollmentService {
     private final CourseRepository courseRepository;
     private final InstructorRepository instructorRepository;
     private final StudentRepository studentRepository;
-    private final CourseMapper courseMapper;
 
     @Autowired
-    public StudentEnrollmentService(StudentEnrollmentRepository studentEnrollmentRepository, CourseRepository courseRepository, InstructorRepository instructorRepository, StudentRepository studentRepository, CourseMapper courseMapper) {
+    public StudentEnrollmentService(
+            StudentEnrollmentRepository studentEnrollmentRepository,
+            CourseRepository courseRepository,
+            InstructorRepository instructorRepository,
+            StudentRepository studentRepository
+    ) {
         this.studentEnrollmentRepository = studentEnrollmentRepository;
         this.courseRepository = courseRepository;
         this.instructorRepository = instructorRepository;
         this.studentRepository = studentRepository;
-        this.courseMapper = courseMapper;
     }
-
-    public StudentEnrollmentService(StudentEnrollmentRepository studentEnrollmentRepository, CourseRepository courseRepository, InstructorRepository instructorRepository, StudentRepository studentRepository) {
-        this(studentEnrollmentRepository, courseRepository, instructorRepository, studentRepository, Mappers.getMapper(CourseMapper.class));
-    }
-
 
     public List<StudentEnrollment> getAllEnrollments() {
         return studentEnrollmentRepository.findAll();
@@ -44,10 +42,6 @@ public class StudentEnrollmentService {
     public StudentEnrollment getEnrollmentById(Long id) {
         return studentEnrollmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Enrollment not found"));
-    }
-
-    public StudentEnrollment createEnrollment(StudentEnrollment enrollment) {
-        return studentEnrollmentRepository.save(resolveEnrollment(enrollment));
     }
 
     public StudentEnrollment updateEnrollment(Long id, StudentEnrollment enrollment) {
@@ -87,16 +81,6 @@ public class StudentEnrollmentService {
                 .student(student)
                 .course(course)
                 .build());
-    }
-
-    public EnrollmentDetailDto enrollCourse(StudentEnrollment enrollment){
-        StudentEnrollment newEnrollment = enrollStudent(enrollment.getStudent().getId(), enrollment.getCourse().getId());
-        return new EnrollmentDetailDto(
-                newEnrollment.getId(),
-                newEnrollment.getStudent().getId(),
-                newEnrollment.getStudent().getName(),
-                courseMapper.toDto(newEnrollment.getCourse())
-        );
     }
 
     private StudentEnrollment resolveEnrollment(StudentEnrollment enrollment) {

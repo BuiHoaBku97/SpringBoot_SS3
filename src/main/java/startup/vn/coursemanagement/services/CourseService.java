@@ -39,10 +39,6 @@ public class CourseService {
         this(courseRepository, instructorRepository, Mappers.getMapper(CourseMapper.class));
     }
 
-    public PageResponse<CourseResponseV2> getPagedCourses(int page, int size, String sortBy, Sort.Direction direction) {
-        return getPagedCourses(page, size, sortBy, direction, null, null);
-    }
-
     public PageResponse<CourseResponseV2> getPagedCourses(
             int page,
             int size,
@@ -72,10 +68,6 @@ public class CourseService {
                 mappedPage.getTotalPages(),
                 mappedPage.isLast()
         );
-    }
-
-    public PageResponse<CourseResponseV2> getAllCourses() {
-        return getPagedCourses(0, DEFAULT_PAGE_SIZE, null, null, null, null);
     }
 
     public CourseResponse getCourseById(Long id) {
