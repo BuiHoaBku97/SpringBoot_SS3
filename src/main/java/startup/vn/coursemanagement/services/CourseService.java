@@ -10,6 +10,7 @@ import startup.vn.coursemanagement.exceptions.ResourceNotFoundException;
 import startup.vn.coursemanagement.models.dto.request.CourseCreateRequest;
 import startup.vn.coursemanagement.models.dto.request.CourseUpdateRequest;
 import startup.vn.coursemanagement.models.dto.response.CourseResponse;
+import startup.vn.coursemanagement.models.dto.response.CourseResponseV2;
 import startup.vn.coursemanagement.models.dto.response.PageResponse;
 import startup.vn.coursemanagement.models.entity.Course;
 import startup.vn.coursemanagement.models.entity.CourseStatus;
@@ -38,18 +39,18 @@ public class CourseService {
         this(courseRepository, instructorRepository, Mappers.getMapper(CourseMapper.class));
     }
 
-    public PageResponse<CourseResponse> getPagedCourses(int page, int size, String sortBy, Sort.Direction direction) {
+    public PageResponse<CourseResponseV2> getPagedCourses(int page, int size, String sortBy, Sort.Direction direction) {
         return getPagedCoursesByStatus(page, size, sortBy, direction, null);
     }
 
-    public PageResponse<CourseResponse> getPagedCoursesByStatus(int page, int size, String sortBy, Sort.Direction direction, CourseStatus status) {
+    public PageResponse<CourseResponseV2> getPagedCoursesByStatus(int page, int size, String sortBy, Sort.Direction direction, CourseStatus status) {
         int safePage = Math.max(page, 0);
         int safeSize = size > 0 ? size : DEFAULT_PAGE_SIZE;
         String resolvedSortBy = (sortBy == null || sortBy.isBlank()) ? "id" : sortBy;
         CourseStatus resolvedStatus = status == null ? CourseStatus.ACTIVE : status;
 
         Pageable pageable = PageRequest.of(safePage, safeSize, Sort.by(direction, resolvedSortBy));
-        Page<CourseResponse> mappedPage = courseRepository.findAllByStatus(resolvedStatus, pageable).map(courseMapper::toDto);
+        Page<CourseResponseV2> mappedPage = courseRepository.findAllByStatus(resolvedStatus, pageable);
         return new PageResponse<>(
                 mappedPage.getContent(),
                 mappedPage.getNumber(),
@@ -60,7 +61,7 @@ public class CourseService {
         );
     }
 
-    public PageResponse<CourseResponse> getAllCourses() {
+    public PageResponse<CourseResponseV2> getAllCourses() {
         return getPagedCoursesByStatus(0, DEFAULT_PAGE_SIZE, null, Sort.Direction.DESC, CourseStatus.ACTIVE);
     }
 
