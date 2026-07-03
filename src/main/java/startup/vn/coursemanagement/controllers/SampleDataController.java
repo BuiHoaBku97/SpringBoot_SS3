@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import startup.vn.coursemanagement.models.dto.ApiResponse;
 import startup.vn.coursemanagement.models.dto.response.SampleDataSeedResponse;
+import startup.vn.coursemanagement.models.dto.response.StudentSeedResponse;
 import startup.vn.coursemanagement.services.SampleDataService;
 
 @RestController
@@ -21,5 +22,11 @@ public class SampleDataController {
     public ResponseEntity<ApiResponse<SampleDataSeedResponse>> seedSampleData() {
         SampleDataSeedResponse response = sampleDataService.seedSampleData();
         return ResponseEntity.ok(ApiResponse.success("Sample data created successfully", response));
+    }
+
+    @PostMapping("/sample-students")
+    public ResponseEntity<ApiResponse<StudentSeedResponse>> initStudents() {
+        StudentSeedResponse response = sampleDataService.initStudents();
+        return ResponseEntity.ok(ApiResponse.success("Student sample data created successfully", response));
     }
 }

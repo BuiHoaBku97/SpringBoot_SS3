@@ -5,11 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import startup.vn.coursemanagement.models.dto.response.SampleDataSeedResponse;
+import startup.vn.coursemanagement.models.dto.response.StudentSeedResponse;
 import startup.vn.coursemanagement.models.entity.Course;
 import startup.vn.coursemanagement.models.entity.CourseStatus;
 import startup.vn.coursemanagement.models.entity.Instructor;
+import startup.vn.coursemanagement.models.entity.Student;
 import startup.vn.coursemanagement.repositories.CourseRepository;
 import startup.vn.coursemanagement.repositories.InstructorRepository;
+import startup.vn.coursemanagement.repositories.StudentRepository;
 
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
@@ -21,23 +24,26 @@ public class SampleDataService {
 
     private final InstructorRepository instructorRepository;
     private final CourseRepository courseRepository;
+    private final StudentRepository studentRepository;
     private final EntityManager entityManager;
 
     @Autowired
     public SampleDataService(
             InstructorRepository instructorRepository,
             CourseRepository courseRepository,
+            StudentRepository studentRepository,
             EntityManager entityManager
     ) {
         this.instructorRepository = instructorRepository;
         this.courseRepository = courseRepository;
+        this.studentRepository = studentRepository;
         this.entityManager = entityManager;
     }
 
     @Transactional
     public SampleDataSeedResponse seedSampleData() {
         entityManager.createNativeQuery(
-                "TRUNCATE TABLE student_enrollments, courses, instructors RESTART IDENTITY CASCADE"
+                "TRUNCATE TABLE student_enrollments, courses, instructors, students RESTART IDENTITY CASCADE"
         ).executeUpdate();
 
         List<Instructor> instructors = IntStream.rangeClosed(1, SAMPLE_ROW_COUNT)
@@ -59,7 +65,33 @@ public class SampleDataService {
 
         List<Course> savedCourses = courseRepository.saveAll(courses);
 
-        return new SampleDataSeedResponse(savedInstructors.size(), savedCourses.size());
+        List<Student> students = IntStream.rangeClosed(1, SAMPLE_ROW_COUNT)
+                .mapToObj(index -> Student.builder()
+                        .name("Student " + index)
+                        .email("student" + index + "@example.com")
+                        .build())
+                .toList();
+
+        List<Student> savedStudents = studentRepository.saveAll(students);
+
+        return new SampleDataSeedResponse(savedInstructors.size(), savedCourses.size(), savedStudents.size());
+    }
+
+    @Transactional
+    public StudentSeedResponse initStudents() {
+        entityManager.createNativeQuery(
+                "TRUNCATE TABLE student_enrollments, students RESTART IDENTITY CASCADE"
+        ).executeUpdate();
+
+        List<Student> students = IntStream.rangeClosed(1, SAMPLE_ROW_COUNT)
+                .mapToObj(index -> Student.builder()
+                        .name("Student " + index)
+                        .email("student" + index + "@example.com")
+                        .build())
+                .toList();
+
+        List<Student> savedStudents = studentRepository.saveAll(students);
+        return new StudentSeedResponse(savedStudents.size());
     }
 
     private Instructor randomInstructor(List<Instructor> instructors) {
